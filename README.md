@@ -46,7 +46,7 @@ Civic Flow is designed to be completely portable with **zero heavy build depende
    - Go to the [Google Cloud Console](https://console.cloud.google.com/).
    - Enable the **Google Civic Information API**.
    - Create an API key.
-   - Copy the `.env.example` file to `.env` (or set the `CIVIC_API_KEY` environment variable if using a build tool). 
+   - Rename the `config.js.template` file to `config.js` and insert your API key. 
    - *Alternatively, you can securely input your API key directly in the application's UI by clicking "Configure API Key".*
 
 3. **Launch the Application**
@@ -58,8 +58,8 @@ Civic Flow is designed to be completely portable with **zero heavy build depende
      Then, open `http://localhost:3000` in your browser.
 
 4. **Testing the Application**
-   - We have included a custom, zero-dependency browser-based test suite!
-   - To run the unit tests, simply open `tests/test.html` in your browser.
+   - The project includes a standalone `test.js` file that validates address parsing, API response handling, and URL generation.
+   - To run the tests, simply open `index.html` in your browser, open the Developer Console (F12), and either paste the contents of `test.js` or temporarily add `<script src="test.js"></script>` to your `index.html`. Results will print directly to the console.
 
 ---
 
@@ -68,7 +68,7 @@ Civic Flow is designed to be completely portable with **zero heavy build depende
 - **Security**: The application never hardcodes API keys. It uses robust input sanitization to strip HTML/scripts from user inputs to prevent XSS. 
 - **Efficiency**: API responses are cached for 5 minutes, and requests are rate-limited (max 1 per 2 seconds) to prevent quota exhaustion. AbortControllers cancel stale requests.
 - **Accessibility**: Built with a WCAG-compliant high-contrast mode toggle, semantic HTML, and dynamic ARIA live regions for screen-reader compatibility.
-- **Maintainability**: The codebase is strictly modularised (`config.js`, `apiHandler.js`, `uiController.js`, `election-wizard.js`) with comprehensive JSDoc comments.
+- **Maintainability**: The codebase is strictly modularised (`config.js.template`, `api.js`, `ui.js`, `app.js`) with comprehensive JSDoc comments.
 
 ---
 *Built with ❤️ for civic education.*
