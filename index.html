@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Civic Flow — Election Process Education</title>
+  <meta name="description" content="Civic Flow is an interactive assistant that guides citizens through every step of the election process — from voter registration to post-election civic engagement." />
+  <meta name="keywords" content="election, voting, civic education, voter registration, democracy, ballot" />
+  <meta name="theme-color" content="#4f46e5" />
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="src/styles.css" />
+
+  <!-- Favicon (inline SVG data URI) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗳️</text></svg>" />
+</head>
+<body>
+  <!-- Decorative Background -->
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <!-- Floating Shapes -->
+  <div class="floating-shape bg-indigo-500" style="width:300px;height:300px;top:-80px;right:-100px;" aria-hidden="true"></div>
+  <div class="floating-shape bg-cyan-500" style="width:200px;height:200px;bottom:10%;left:-60px;animation-delay:3s;" aria-hidden="true"></div>
+
+  <!-- ========== HEADER / NAV ========== -->
+  <header class="sticky top-0 z-50 backdrop-blur-lg border-b" style="background:rgba(15,23,42,0.85);border-color:var(--clr-border);">
+    <nav class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-3 no-underline" id="nav-logo">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:linear-gradient(135deg,var(--clr-primary),var(--clr-accent));">
+          🗳️
+        </div>
+        <div>
+          <span class="font-bold text-lg" style="color:var(--clr-text-heading);">Civic Flow</span>
+          <span class="badge badge--primary ml-2 hide-mobile">Education</span>
+        </div>
+      </a>
+
+      <!-- Nav Actions -->
+      <div class="flex items-center gap-4 sm:gap-6">
+        <!-- Nav Links (desktop) -->
+        <div class="hidden md:flex items-center gap-5 text-sm font-medium" style="color:var(--clr-text-muted);">
+          <a href="#steps" class="nav-link hover:text-white transition-colors">Steps</a>
+          <a href="#lookup" class="nav-link hover:text-white transition-colors">Lookup</a>
+          <a href="#election-101" class="nav-link hover:text-white transition-colors">101</a>
+          <a href="#about" class="nav-link hover:text-white transition-colors">About</a>
+        </div>
+
+        <!-- High-Contrast Toggle -->
+        <div class="contrast-toggle" id="contrast-toggle" role="switch" aria-checked="false" tabindex="0" aria-label="Toggle high contrast mode">
+          <span class="text-xs font-medium hide-mobile" style="color:var(--clr-text-muted);" id="contrast-label">High Contrast: Off</span>
+          <div class="contrast-toggle__track" id="contrast-track">
+            <div class="contrast-toggle__thumb"></div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ========== HERO SECTION ========== -->
+  <main>
+    <section class="relative max-w-6xl mx-auto px-4 sm:px-6 pt-16 pb-12 md:pt-24 md:pb-16 text-center" id="hero">
+      <div class="animate-fadeInUp">
+        <span class="badge badge--accent mb-6 inline-flex">🇺🇸 Free &amp; Open Civic Education</span>
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-6" style="color:var(--clr-text-heading);">
+          Your Guide to the<br />
+          <span style="background:linear-gradient(135deg,var(--clr-primary-light),var(--clr-accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+            Election Process
+          </span>
+        </h1>
+        <p class="max-w-2xl mx-auto text-base sm:text-lg mb-8" style="color:var(--clr-text-muted);">
+          Civic Flow walks you through every step of the democratic voting journey — from registration to results — so you can participate with confidence.
+        </p>
+        <div class="flex flex-wrap items-center justify-center gap-4">
+          <a href="#steps" class="btn-primary inline-flex items-center gap-2">
+            Get Started
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#about" class="btn-outline inline-flex items-center gap-2">
+            Learn More
+          </a>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-14 max-w-3xl mx-auto animate-fadeInUp delay-2">
+        <div class="card p-4 text-center">
+          <div class="text-2xl font-bold" style="color:var(--clr-primary-light);">6</div>
+          <div class="text-xs mt-1" style="color:var(--clr-text-muted);">Key Steps</div>
+        </div>
+        <div class="card p-4 text-center">
+          <div class="text-2xl font-bold" style="color:var(--clr-accent);">100%</div>
+          <div class="text-xs mt-1" style="color:var(--clr-text-muted);">Free Access</div>
+        </div>
+        <div class="card p-4 text-center">
+          <div class="text-2xl font-bold" style="color:var(--clr-primary-light);">♿</div>
+          <div class="text-xs mt-1" style="color:var(--clr-text-muted);">Accessible</div>
+        </div>
+        <div class="card p-4 text-center">
+          <div class="text-2xl font-bold" style="color:var(--clr-accent);">📱</div>
+          <div class="text-xs mt-1" style="color:var(--clr-text-muted);">Responsive</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== STEPS SECTION ========== -->
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-20" id="steps">
+      <div class="text-center mb-12 animate-fadeInUp">
+        <span class="badge badge--primary mb-4 inline-flex">Step-by-Step Guide</span>
+        <h2 class="text-3xl md:text-4xl font-bold mb-3" style="color:var(--clr-text-heading);">
+          The Election Journey
+        </h2>
+        <p class="max-w-xl mx-auto" style="color:var(--clr-text-muted);">
+          Follow these six essential steps to understand and participate in the democratic process.
+        </p>
+      </div>
+
+      <div class="space-y-6" id="steps-container">
+        <!-- Steps rendered by app.js -->
+      </div>
+    </section>
+
+    <!-- ========== ELECTION LOOKUP SECTION ========== -->
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-20" id="lookup">
+      <div class="text-center mb-10 animate-fadeInUp">
+        <span class="badge badge--accent mb-4 inline-flex">🔍 Live Lookup</span>
+        <h2 class="text-3xl md:text-4xl font-bold mb-3" style="color:var(--clr-text-heading);">
+          Find Your Election Info
+        </h2>
+        <p class="max-w-xl mx-auto" style="color:var(--clr-text-muted);">
+          Enter your registered address to see upcoming elections, polling locations, and more.
+        </p>
+      </div>
+
+      <div class="card p-6 md:p-8 animate-fadeInUp delay-1" id="lookup-card">
+        <!-- API Key Config (collapsed) -->
+        <div class="mb-5">
+          <button class="text-xs font-medium flex items-center gap-1 mb-2" style="color:var(--clr-text-muted);background:none;border:none;cursor:pointer;font-family:var(--font-primary);" id="api-key-toggle">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            Configure API Key
+          </button>
+          <div class="hidden" id="api-key-panel">
+            <div class="rounded-lg p-4 mb-2" style="background:rgba(6,182,212,0.08);border:1px solid var(--clr-border);">
+              <label for="api-key-input" class="block text-xs font-medium mb-2" style="color:var(--clr-text-muted);">
+                Google Civic Information API Key
+              </label>
+              <input type="password" id="api-key-input" autocomplete="off" spellcheck="false"
+                     placeholder="AIzaSy..."
+                     class="w-full rounded-lg px-4 py-2.5 text-sm"
+                     style="background:var(--clr-bg);border:1px solid var(--clr-border);color:var(--clr-text);font-family:var(--font-primary);" />
+              <p class="text-xs mt-2" style="color:var(--clr-text-muted);">
+                Get a free key at <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" style="color:var(--clr-accent-light);">Google Cloud Console</a>. Your key stays in the browser — never sent to our servers.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Address Form -->
+        <form id="address-lookup-form" class="flex flex-col sm:flex-row gap-3">
+          <div class="flex-1">
+            <label for="address-input" class="sr-only">Your registered address</label>
+            <input type="text" id="address-input"
+                   placeholder="Enter your address (e.g. 1600 Pennsylvania Ave NW, Washington, DC 20500)"
+                   class="w-full rounded-xl px-5 py-3.5 text-sm"
+                   style="background:var(--clr-bg);border:1.5px solid var(--clr-border);color:var(--clr-text);font-family:var(--font-primary);transition:border-color 0.3s;"
+                   required />
+          </div>
+          <button type="submit" class="btn-primary flex items-center justify-center gap-2 whitespace-nowrap" id="lookup-submit-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            Search
+          </button>
+        </form>
+
+        <!-- Demo button -->
+        <div class="mt-4 text-center">
+          <button class="text-xs font-medium" style="color:var(--clr-accent-light);background:none;border:none;cursor:pointer;font-family:var(--font-primary);text-decoration:underline;" id="demo-btn">
+            No API key? Try a demo lookup →
+          </button>
+        </div>
+      </div>
+
+      <!-- Results Container -->
+      <div class="mt-6 space-y-4" id="lookup-results"></div>
+    </section>
+
+    <!-- ========== ELECTION 101 WIZARD ========== -->
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-20" id="election-101" aria-label="Election 101 interactive wizard">
+      <div class="text-center mb-10 animate-fadeInUp">
+        <span class="badge badge--primary mb-4 inline-flex">🎓 Interactive Guide</span>
+        <h2 class="text-3xl md:text-4xl font-bold mb-3" style="color:var(--clr-text-heading);">
+          Election 101
+        </h2>
+        <p class="max-w-xl mx-auto" style="color:var(--clr-text-muted);">
+          A step-by-step wizard to get you fully prepared — from registration to Election Day.
+        </p>
+      </div>
+      <div class="card p-6 md:p-8 animate-fadeInUp delay-1" id="election-wizard-root" role="region" aria-label="Election 101 wizard steps">
+        <!-- Rendered by election-wizard.js -->
+      </div>
+    </section>
+
+    <!-- ========== ABOUT SECTION ========== -->
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-20" id="about">
+      <div class="card p-8 md:p-12 text-center animate-fadeInUp">
+        <h2 class="text-2xl md:text-3xl font-bold mb-4" style="color:var(--clr-text-heading);">About Civic Flow</h2>
+        <p class="max-w-2xl mx-auto leading-relaxed" style="color:var(--clr-text-muted);">
+          Civic Flow is a free, open-source educational tool designed to demystify the election process. 
+          Whether you're a first-time voter or a seasoned participant, our step-by-step guide helps you 
+          understand every phase — from registering to vote, all the way through post-election civic engagement. 
+          Built with accessibility at its core, Civic Flow includes a high-contrast mode and responsive design 
+          to ensure everyone can access this vital information.
+        </p>
+        <div class="flex flex-wrap justify-center gap-3 mt-8">
+          <span class="badge badge--primary">Open Source</span>
+          <span class="badge badge--accent">WCAG Accessible</span>
+          <span class="badge badge--primary">Nonpartisan</span>
+          <span class="badge badge--accent">Mobile-First</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="border-t py-8" style="border-color:var(--clr-border);">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm" style="color:var(--clr-text-muted);">
+      <p>&copy; <span id="footer-year"></span> Civic Flow. Built for civic education.</p>
+      <p>Made with ❤️ for democracy</p>
+    </div>
+  </footer>
+
+  <!-- Spin animation for loading state -->
+  <style>
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    #address-input:focus { border-color: var(--clr-primary-light) !important; outline: none; }
+  </style>
+
+  <!-- App Scripts -->
+  <script src="src/config.js"></script>
+  <script src="src/api.js"></script>
+  <script src="src/ui.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>

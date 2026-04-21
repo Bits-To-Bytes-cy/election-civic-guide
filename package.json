@@ -1,0 +1,19 @@
+{
+  "name": "civic-flow",
+  "version": "1.0.0",
+  "description": "An interactive web-based assistant for Election Process Education — guiding citizens through every step of the democratic voting journey.",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve . -p 3000 --no-clipboard",
+    "start": "npx serve . -p 3000 --no-clipboard"
+  },
+  "keywords": [
+    "election",
+    "civic-education",
+    "voting",
+    "democracy",
+    "accessibility"
+  ],
+  "author": "",
+  "license": "MIT"
+}

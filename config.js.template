@@ -1,0 +1,13 @@
+/**
+ * @fileoverview Civic Flow — Secure Configuration Template
+ * 
+ * INSTRUCTIONS:
+ * 1. Copy this file and rename it to `config.js`.
+ * 2. Replace the placeholder below with your actual Google Civic Information API Key.
+ * 3. NEVER commit `config.js` to version control.
+ */
+
+window.__CIVIC_CONFIG__ = {
+  // Get a free key at https://console.cloud.google.com/apis/credentials
+  apiKey: 'YOUR_API_KEY_HERE'
+};
