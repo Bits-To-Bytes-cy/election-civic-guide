@@ -49,16 +49,6 @@
           <a href="#about" class="nav-link hover:text-white transition-colors">About</a>
         </div>
 
-        <!-- Language Picker -->
-        <select id="language-picker" aria-label="Select Language" class="text-xs p-1 rounded bg-gray-800 text-white border border-gray-600">
-          <option value="en">English</option>
-          <option value="es">Español</option>
-          <option value="hi">हिन्दी</option>
-        </select>
-
-        <!-- Google Auth Container -->
-        <div id="google-auth-container" class="min-w-[200px] flex justify-center"></div>
-
         <!-- High-Contrast Toggle -->
         <div class="contrast-toggle" id="contrast-toggle" role="switch" aria-checked="false" tabindex="0" aria-label="Toggle high contrast mode">
           <span class="text-xs font-medium hide-mobile" style="color:var(--clr-text-muted);" id="contrast-label">High Contrast: Off</span>
@@ -166,14 +156,6 @@
                 <label for="gemini-api-key-input" class="block text-xs font-medium mb-1" style="color:var(--clr-text-muted);">Gemini AI API Key</label>
                 <input type="password" id="gemini-api-key-input" autocomplete="off" class="w-full rounded-lg px-3 py-2 text-sm" style="background:var(--clr-bg);border:1px solid var(--clr-border);color:var(--clr-text);" />
               </div>
-              <div>
-                <label for="translate-api-key-input" class="block text-xs font-medium mb-1" style="color:var(--clr-text-muted);">Translate API Key</label>
-                <input type="password" id="translate-api-key-input" autocomplete="off" class="w-full rounded-lg px-3 py-2 text-sm" style="background:var(--clr-bg);border:1px solid var(--clr-border);color:var(--clr-text);" />
-              </div>
-              <div>
-                <label for="client-id-input" class="block text-xs font-medium mb-1" style="color:var(--clr-text-muted);">Google Client ID</label>
-                <input type="password" id="client-id-input" autocomplete="off" class="w-full rounded-lg px-3 py-2 text-sm" style="background:var(--clr-bg);border:1px solid var(--clr-border);color:var(--clr-text);" />
-              </div>
               <p class="text-xs mt-2" style="color:var(--clr-text-muted);">
                 Your keys stay strictly in the browser. Never committed to the server.
               </p>
@@ -207,9 +189,6 @@
 
       <!-- Results Container -->
       <div class="mt-6 space-y-4" id="lookup-results"></div>
-      
-      <!-- Static Map Container -->
-      <div id="map-container" style="height: 300px; width: 100%;" class="mt-4 rounded-lg bg-gray-800 hidden"></div>
     </section>
 
     <!-- ========== ELECTION 101 WIZARD ========== -->
@@ -224,18 +203,7 @@
         </p>
       </div>
       <div class="card p-6 md:p-8 animate-fadeInUp delay-1" id="election-wizard-root" role="region" aria-label="Election 101 wizard steps">
-        <div id="chat-window" class="h-48 overflow-y-auto mb-4 p-4 bg-gray-900 rounded">
-          <div class="p-3 rounded-lg bg-gray-800 border border-indigo-500 mb-2">
-            <p class="text-sm text-white" id="greeting-text"><strong>AI:</strong> Hello! Ask me about voting!</p>
-          </div>
-        </div>
-        <form id="chat-form">
-          <div class="flex gap-2 mt-4">
-            <input id="chat-input" type="text" class="flex-grow p-2 rounded bg-gray-700 border-none" placeholder="Ask Gemini about voting..." required autocomplete="off" />
-            <button type="submit" id="send-btn" class="bg-blue-600 px-6 py-2 rounded font-bold text-white">Send</button>
-          </div>
-        </form>
-        <button id="save-plan-btn" class="hidden mt-2 text-sm text-blue-400 underline">Save Plan to Profile</button>
+        <!-- Rendered by election-wizard.js -->
       </div>
     </section>
 
@@ -274,18 +242,10 @@
     #address-input:focus { border-color: var(--clr-primary-light) !important; outline: none; }
   </style>
 
-  <!-- App Scripts (ES Modules) -->
-  <!-- Note: We rely on src/app.js to orchestrate the imports -->
-  <script type="module" src="src/app.js"></script>
-
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    // Note: We use window.__CIVIC_CONFIG__ or the config module to dynamically inject the real Measurement ID later if needed.
-    // For now, it initializes the datalayer so our trackEvent helper works.
-  </script>
+  <!-- App Scripts -->
+  <script src="src/config.js"></script>
+  <script src="src/api.js"></script>
+  <script src="src/ui.js"></script>
+  <script src="src/app.js"></script>
 </body>
 </html>
