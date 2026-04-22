@@ -1,9 +1,6 @@
 /**
  * @fileoverview Civic Flow — UI & Wizard Controller
  *
- * Organizes all DOM manipulation, rendering logic, and the interactive
- * Election 101 wizard. Reads data from API module and Config.
- * 
  * @module ui
  */
 
@@ -19,84 +16,46 @@
   const MAIN_STEPS = [
     { id: 1, title: 'Voter Registration', icon: '📋',
       summary: 'Register to vote in your jurisdiction before the deadline.',
-      details: 'Every citizen\'s journey begins with registration. Most states allow online registration, while some require mail-in or in-person enrollment. Key documents include a government-issued ID, proof of residence, and your Social Security number.',
+      details: 'Most states allow online registration. Key documents include a government-issued ID and proof of residence.',
       tips: ['Check your state\'s deadline at vote.gov', 'Update registration if you\'ve moved'] },
     { id: 2, title: 'Understanding the Ballot', icon: '🗳️',
       summary: 'Learn about candidates, measures, and ballot structure.',
-      details: 'Ballots contain federal, state, and local races plus ballot measures. Federal races include President, Senate, and House.',
-      tips: ['Use nonpartisan voter guides', 'Read full text of ballot measures'] },
-    { id: 3, title: 'Voting Methods', icon: '✉️',
-      summary: 'Choose how to cast your vote — in-person, by mail, or early.',
-      details: 'Modern elections offer multiple ways to vote: traditional in-person on Election Day, early voting at designated locations, and mail-in/absentee voting.',
-      tips: ['Early voting often has shorter lines', 'Request mail ballots well before the deadline'] },
-    { id: 4, title: 'Election Day', icon: '🏛️',
-      summary: 'Know your rights and what to expect at the polls.',
-      details: 'Polls are typically open 7 AM – 8 PM. Bring required ID, check in, receive your ballot, mark choices privately, and submit.',
-      tips: ['Ask for a replacement if you make a mistake', 'You can\'t be turned away if in line at closing'] },
-    { id: 5, title: 'Counting & Results', icon: '📊',
-      summary: 'Understand how votes are tallied and results certified.',
-      details: 'After polls close, workers count ballots. In-person votes are usually tallied electronically the same night.',
-      tips: ['Election night results are projections', 'Certification takes days to weeks'] },
-    { id: 6, title: 'Post-Election Engagement', icon: '🤝',
-      summary: 'Stay engaged — democracy doesn\'t stop at the ballot.',
-      details: 'After an election, stay engaged by attending town halls, contacting representatives, and joining community organizations.',
-      tips: ['Subscribe to officials\' newsletters', 'Volunteer as a poll worker next time'] }
+      details: 'Ballots contain federal, state, and local races plus ballot measures.',
+      tips: ['Use nonpartisan voter guides', 'Read full text of ballot measures'] }
   ];
 
-  /**
-   * Renders the 6-step election education cards.
-   */
   function renderSteps() {
     const c = $('#steps-container');
     if (!c) return;
     c.innerHTML = MAIN_STEPS.map((s, i) => `
-      <div class="card p-6 md:p-8 animate-fadeInUp delay-${i + 1}" id="step-${s.id}">
-        <div class="flex items-start gap-4 md:gap-6">
+      <div class="card p-6 animate-fadeInUp delay-${i + 1}" id="step-${s.id}">
+        <div class="flex items-start gap-4">
           <div class="step-number">${s.id}</div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-3 mb-2 flex-wrap">
-              <span class="text-2xl">${s.icon}</span>
-              <h3 class="text-xl md:text-2xl font-bold" style="color:var(--clr-text-heading)">${s.title}</h3>
+          <div class="flex-1">
+            <h3 class="text-xl font-bold" style="color:var(--clr-text-heading)">${s.icon} ${s.title}</h3>
+            <p class="text-sm mb-2" style="color:var(--clr-text-muted)">${s.summary}</p>
+            <div class="hidden" id="details-${s.id}">
+              <p class="mb-2 text-sm">${s.details}</p>
             </div>
-            <p class="text-sm md:text-base mb-4" style="color:var(--clr-text-muted)">${s.summary}</p>
-            <div class="step-details hidden" id="details-${s.id}">
-              <p class="mb-4 leading-relaxed">${s.details}</p>
-              <div class="rounded-xl p-4" style="background:rgba(79,70,229,0.08);border:1px solid var(--clr-border)">
-                <p class="font-semibold mb-2 text-sm" style="color:var(--clr-primary-light)">💡 Quick Tips</p>
-                <ul class="space-y-1">
-                  ${s.tips.map(t => `<li class="flex items-start gap-2 text-sm" style="color:var(--clr-text-muted)"><span style="color:var(--clr-accent)">▸</span><span>${t}</span></li>`).join('')}
-                </ul>
-              </div>
-            </div>
-            <button class="btn-outline mt-4 text-sm" onclick="CivicFlow.UI.toggleStep(${s.id})" aria-expanded="false" aria-controls="details-${s.id}" id="btn-${s.id}">Learn More ↓</button>
+            <button class="btn-outline mt-2 text-xs" onclick="CivicFlow.UI.toggleStep(${s.id})" id="btn-${s.id}">Learn More ↓</button>
           </div>
         </div>
       </div>
     `).join('');
   }
 
-  /**
-   * Toggles detail panels.
-   * @param {number} id 
-   */
   function toggleStep(id) {
     const d = $(`#details-${id}`), b = $(`#btn-${id}`);
     if (!d || !b) return;
     const show = d.classList.contains('hidden');
     d.classList.toggle('hidden');
-    b.setAttribute('aria-expanded', String(show));
     b.textContent = show ? 'Show Less ↑' : 'Learn More ↓';
-    if (show) d.classList.add('animate-fadeIn');
   }
 
   /* ==========================================================
-   *  UI: LOOKUP RENDERING
+   *  UI: LOOKUP RENDERING & MAPS
    * ========================================================== */
 
-  /**
-   * Render lookup results.
-   * @param {Object} data 
-   */
   function renderResults(data) {
     const container = $('#lookup-results');
     if (!container) return;
@@ -105,44 +64,44 @@
 
     if (data.election) {
       const calUrl = API.buildCalendarUrl(data.election.name, data.election.date);
-      const fmt = data.election.date ? new Date(data.election.date + 'T00:00:00').toLocaleDateString() : 'Date not available';
       html += `
-        <div class="card p-6 animate-fadeInUp" id="election-result">
-          <div class="flex items-start gap-4">
-            <div class="step-number" style="width:44px;height:44px;font-size:1.1rem;">📅</div>
-            <div class="flex-1">
-              <h3 class="text-lg font-bold mb-1" style="color:var(--clr-text-heading)">${data.election.name}</h3>
-              <p class="text-sm mb-3" style="color:var(--clr-text-muted)"><strong style="color:var(--clr-accent-light)">${fmt}</strong></p>
-              <a href="${calUrl}" target="_blank" rel="noopener noreferrer" class="btn-primary inline-flex items-center gap-2 text-sm no-underline" style="padding:0.5rem 1.2rem;">
-                Save to Google Calendar
-              </a>
-            </div>
-          </div>
+        <div class="card p-6 mb-4 animate-fadeInUp">
+          <h3 class="text-lg font-bold">${data.election.name}</h3>
+          <p class="text-sm mb-3">${data.election.date || 'Date not available'}</p>
+          <a href="${calUrl}" target="_blank" class="btn-primary text-sm no-underline">Save to Calendar</a>
         </div>`;
     }
 
     const all = [...data.pollingLocations, ...data.earlyVoteSites, ...data.dropOffLocations];
     if (all.length > 0) {
-      html += `<div class="mt-4"><h3 class="text-lg font-bold mb-4" style="color:var(--clr-text-heading)">📍 Locations (${all.length})</h3><div class="space-y-4">`;
-      all.forEach((loc, i) => {
-        html += `
-          <div class="card p-5 animate-fadeInUp delay-${Math.min(i+1,6)}">
-            <h4 class="font-semibold" style="color:var(--clr-text-heading)">${loc.name}</h4>
-            <p class="text-sm mb-1" style="color:var(--clr-text-muted)">📍 ${loc.address}</p>
-            <p class="text-sm mb-3" style="color:var(--clr-text-muted)">🕐 ${loc.hours}</p>
-            <a href="${loc.mapsUrl}" target="_blank" rel="noopener noreferrer" class="btn-outline inline-flex items-center gap-2 text-sm no-underline">
-              View on Google Maps
-            </a>
-          </div>`;
-      });
-      html += `</div></div>`;
+      const loc = all[0]; // Display the first location on the map for simplicity
+      html += `
+        <div class="card p-5 animate-fadeInUp">
+          <h4 class="font-semibold" style="color:var(--clr-text-heading)">📍 ${loc.name}</h4>
+          <p class="text-sm mb-1" style="color:var(--clr-text-muted)">${loc.address}</p>
+          <p class="text-sm mb-3" style="color:var(--clr-text-muted)">🕐 ${loc.hours}</p>
+          <div id="map-container" style="width: 100%; height: 250px; border-radius: 8px; background: #eee; margin-top: 10px;">
+            <p style="padding: 20px; text-align: center; color: #666;">Loading Map...</p>
+          </div>
+        </div>`;
+      
+      // Async map rendering after HTML injection
+      setTimeout(() => {
+        const mapEl = $('#map-container');
+        if (mapEl) {
+          API.renderMap(mapEl, loc.address, loc.name).catch(err => {
+            mapEl.innerHTML = `<p style="padding: 20px; text-align: center; color: red;">Map error: ${err.message}</p>`;
+          });
+        }
+      }, 50);
     }
-    container.innerHTML = html || `<div class="card p-6 text-center animate-fadeIn"><p>No Results Found</p></div>`;
+    
+    container.innerHTML = html || `<div class="card p-6 text-center"><p>No Results Found</p></div>`;
   }
 
   function renderError(message) {
     const c = $('#lookup-results');
-    if (c) c.innerHTML = `<div class="card p-6 animate-fadeIn" style="border-color:#ef4444;"><p style="color:#f87171">⚠️ ${window.CivicFlow.API.escapeHTML(message)}</p></div>`;
+    if (c) c.innerHTML = `<div class="card p-6 text-red-500 animate-fadeIn">⚠️ ${message}</div>`;
   }
 
   function renderLoading(show) {
@@ -151,50 +110,66 @@
   }
 
   /* ==========================================================
-   *  WIZARD COMPONENT
+   *  UI: GEMINI AI CHAT ASSISTANT
    * ========================================================== */
 
-  const STATES = [{abbr:'CA',name:'California'}, {abbr:'NY',name:'New York'}, {abbr:'TX',name:'Texas'}]; // Truncated for brevity
-  const WIZARD_STEPS = [
-    { id: 'register', title: 'How to Register to Vote', icon: '📋', renderContent: () => `<p>Register at vote.gov.</p>` },
-    { id: 'research', title: 'Research Candidates Safely', icon: '🔍', renderContent: () => `<p>Use Ballotpedia.</p>` },
-    { id: 'polls',    title: 'What to Bring to the Polls', icon: '🏛️', renderContent: () => `<p>Bring your ID.</p>` }
-  ];
-  let currentStep = 0;
-
-  /**
-   * Renders the wizard UI.
-   */
   function renderWizard() {
     const root = $('#election-wizard-root');
     if (!root) return;
-    const step = WIZARD_STEPS[currentStep];
-    const isFirst = currentStep === 0, isLast = currentStep === WIZARD_STEPS.length - 1;
-
+    
     root.innerHTML = `
-      <div id="wizard-live" class="sr-only" aria-live="polite">Step ${currentStep+1} of ${WIZARD_STEPS.length}: ${step.title}</div>
-      <div class="flex items-center gap-3 mb-6">
-        <h3 class="text-xl md:text-2xl font-bold" style="color:var(--clr-text-heading)">${step.icon} ${step.title}</h3>
+      <div class="flex items-center gap-3 mb-4">
+        <h3 class="text-xl font-bold" style="color:var(--clr-text-heading)">🤖 Civic AI Assistant</h3>
       </div>
-      <div class="animate-fadeIn">${step.renderContent()}</div>
-      <div class="flex items-center justify-between mt-8 pt-6 border-t border-gray-700">
-        <button class="btn-outline text-sm ${isFirst?'invisible':''}" onclick="CivicFlow.UI.goToWizardStep(${currentStep-1})">Previous</button>
-        <span class="text-xs font-medium">${currentStep+1} / ${WIZARD_STEPS.length}</span>
-        ${isLast 
-          ? `<button class="btn-primary text-sm" onclick="CivicFlow.UI.goToWizardStep(0)">Start Over</button>`
-          : `<button class="btn-primary text-sm" onclick="CivicFlow.UI.goToWizardStep(${currentStep+1})">Next</button>`}
-      </div>`;
+      <div id="chat-history" class="mb-4 space-y-3" style="max-height: 300px; overflow-y: auto; padding-right: 10px;">
+        <div class="p-3 rounded-lg" style="background:rgba(79,70,229,0.1); border:1px solid var(--clr-primary-light);">
+          <p class="text-sm" style="color:var(--clr-text)"><strong>AI:</strong> Hello! I am your Civic Flow AI Assistant. Ask me anything about voter registration, early voting, or election policies!</p>
+        </div>
+      </div>
+      <form id="chat-form" class="flex gap-2">
+        <input type="text" id="chat-input" placeholder="Type your question..." class="flex-1 rounded-lg px-4 py-2 text-sm" style="background:var(--clr-bg);border:1px solid var(--clr-border);color:var(--clr-text);" required autocomplete="off" />
+        <button type="submit" class="btn-primary px-4 py-2 text-sm" id="chat-btn">Send</button>
+      </form>
+    `;
+
+    $('#chat-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = $('#chat-input');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      appendChatMessage('You', msg);
+      input.value = '';
+      const btn = $('#chat-btn');
+      btn.disabled = true;
+      btn.textContent = '...';
+
+      try {
+        const reply = await window.CivicFlow.API.askGemini(msg);
+        appendChatMessage('AI', reply);
+      } catch (err) {
+        appendChatMessage('Error', err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send';
+      }
+    });
   }
 
-  /**
-   * Navigates wizard.
-   * @param {number} step 
-   */
-  function goToWizardStep(step) {
-    if (step >= 0 && step < WIZARD_STEPS.length) {
-      currentStep = step;
-      renderWizard();
-    }
+  function appendChatMessage(sender, text) {
+    const hist = $('#chat-history');
+    if (!hist) return;
+    const isUser = sender === 'You';
+    const bg = isUser ? 'rgba(255,255,255,0.05)' : 'rgba(79,70,229,0.1)';
+    const color = isUser ? 'var(--clr-text-muted)' : 'var(--clr-text)';
+    
+    const div = document.createElement('div');
+    div.className = 'p-3 rounded-lg animate-fadeIn';
+    div.style = `background:${bg}; border:1px solid var(--clr-border);`;
+    div.innerHTML = `<p class="text-sm" style="color:${color}"><strong>${sender}:</strong> ${window.CivicFlow.API.escapeHTML(text)}</p>`;
+    
+    hist.appendChild(div);
+    hist.scrollTop = hist.scrollHeight;
   }
 
   /* ==========================================================
@@ -208,7 +183,6 @@
     renderResults,
     renderError,
     renderLoading,
-    renderWizard,
-    goToWizardStep
+    renderWizard
   };
 })();

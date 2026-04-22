@@ -120,5 +120,98 @@
     });
   });
 
-  console.log(`\n🏁 Test Results: ${passed} Passed, ${failed} Failed`);
+  describe('Gemini AI Chat Integration', () => {
+    it('successfully parses a Gemini API response', async () => {
+      // Mock the global fetch
+      const originalFetch = window.fetch;
+      window.fetch = async (url, options) => {
+        if (url.includes('gemini-3-flash:generateContent')) {
+          return {
+            ok: true,
+            json: async () => ({
+              candidates: [{ content: { parts: [{ text: "Mocked AI Response" }] } }]
+            })
+          };
+        }
+        return originalFetch(url, options);
+      };
+
+      try {
+        // Stub the Config to return a fake key for testing
+        const originalGetKey = window.CivicFlow.Config.getGeminiApiKey;
+        window.CivicFlow.Config.getGeminiApiKey = () => 'FAKE_TEST_KEY';
+        
+        const response = await API.askGemini('What is voting?');
+        expect(response).toBe('Mocked AI Response');
+
+        // Restore stubs
+        window.CivicFlow.Config.getGeminiApiKey = originalGetKey;
+      } finally {
+        window.fetch = originalFetch;
+      }
+    });
+
+    it('throws an error when Gemini API fails', async () => {
+      const originalFetch = window.fetch;
+      window.fetch = async (url) => {
+        if (url.includes('gemini-3-flash')) {
+          return { ok: false, status: 500 };
+        }
+        return originalFetch(url);
+      };
+
+      try {
+        const originalGetKey = window.CivicFlow.Config.getGeminiApiKey;
+        window.CivicFlow.Config.getGeminiApiKey = () => 'FAKE_TEST_KEY';
+        
+        let threw = false;
+        try {
+          await API.askGemini('Hello?');
+        } catch (e) {
+          threw = true;
+          expect(e.message.includes('500')).toBeTruthy();
+        }
+        expect(threw).toBe(true);
+
+        window.CivicFlow.Config.getGeminiApiKey = originalGetKey;
+      } finally {
+        window.fetch = originalFetch;
+      }
+    });
+  });
+
+  describe('Google Maps JS API Loading', () => {
+    it('does not crash if Maps API fails to load', async () => {
+      const originalGetKey = window.CivicFlow.Config.getMapsApiKey;
+      window.CivicFlow.Config.getMapsApiKey = () => 'FAKE_KEY';
+      
+      // Override document.createElement to simulate a script error
+      const originalCreate = document.createElement;
+      document.createElement = (tagName) => {
+        if (tagName === 'script') {
+          const script = originalCreate.call(document, 'script');
+          // Simulate immediate failure
+          setTimeout(() => { if (script.onerror) script.onerror(new Error('Network error')); }, 10);
+          return script;
+        }
+        return originalCreate.call(document, tagName);
+      };
+
+      let threw = false;
+      try {
+        await API.loadGoogleMaps();
+      } catch (e) {
+        threw = true;
+      }
+      expect(threw).toBe(true);
+
+      document.createElement = originalCreate;
+      window.CivicFlow.Config.getMapsApiKey = originalGetKey;
+    });
+  });
+
+  // Delay the final result print slightly because we used async tests
+  setTimeout(() => {
+    console.log(`\n🏁 Test Results: ${passed} Passed, ${failed} Failed`);
+  }, 100);
 })();

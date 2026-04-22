@@ -48,61 +48,47 @@
   });
 
   /**
-   * Resolves the Google Civic Information API key from available sources.
-   * Priority: UI input → process.env → window config → error.
+   * Helper to resolve an API key from available sources.
+   * Priority: UI input -> process.env -> window config.
    *
-   * @returns {string} A valid API key string
-   * @throws {Error} If no API key is available from any source
+   * @param {string} inputId - DOM ID of the input field
+   * @param {string} envVar - Name of the environment variable
+   * @param {string} windowKey - Key name in window.__CIVIC_CONFIG__
+   * @returns {string} The resolved API key
+   * @throws {Error} If no key is found
    */
-  function getApiKey() {
-    // 1. Check UI input field (runtime, browser-only)
-    const inputEl = document.getElementById('api-key-input');
+  function _resolveKey(inputId, envVar, windowKey, serviceName) {
+    const inputEl = document.getElementById(inputId);
     const inputKey = inputEl ? inputEl.value.trim() : '';
-    if (inputKey && inputKey.length > 10) {
-      return inputKey;
-    }
+    if (inputKey && inputKey.length > 10) return inputKey;
 
-    // 2. Check process.env (available when using a build tool like Vite/Webpack)
     try {
-      if (typeof process !== 'undefined' &&
-          process.env &&
-          process.env.CIVIC_API_KEY &&
-          process.env.CIVIC_API_KEY !== 'your_google_civic_api_key_here') {
-        return process.env.CIVIC_API_KEY;
+      if (typeof process !== 'undefined' && process.env && process.env[envVar] && !process.env[envVar].includes('YOUR_')) {
+        return process.env[envVar];
       }
-    } catch (_) {
-      // process is not defined in plain browser environments — expected
+    } catch (_) {}
+
+    if (typeof window.__CIVIC_CONFIG__ === 'object' && window.__CIVIC_CONFIG__[windowKey] && !window.__CIVIC_CONFIG__[windowKey].includes('YOUR_')) {
+      return window.__CIVIC_CONFIG__[windowKey];
     }
 
-    // 3. Check window-level config (for manual injection via <script>)
-    if (typeof window.__CIVIC_CONFIG__ === 'object' &&
-        window.__CIVIC_CONFIG__.apiKey &&
-        window.__CIVIC_CONFIG__.apiKey.length > 10) {
-      return window.__CIVIC_CONFIG__.apiKey;
-    }
-
-    throw new Error(
-      'Please enter your Google Civic Information API key. ' +
-      'See .env.example for setup instructions.'
-    );
+    throw new Error(`Missing API Key for ${serviceName}. Please configure it.`);
   }
 
-  /**
-   * Validates that an API key looks structurally correct.
-   * Does NOT verify the key against the API — only checks format.
-   *
-   * @param {string} key - The API key to validate
-   * @returns {boolean} True if the key has a valid format
-   */
+  function getCivicApiKey() { return _resolveKey('civic-api-key-input', 'CIVIC_API_KEY', 'civicApiKey', 'Google Civic Info'); }
+  function getMapsApiKey() { return _resolveKey('maps-api-key-input', 'MAPS_API_KEY', 'mapsApiKey', 'Google Maps JS'); }
+  function getGeminiApiKey() { return _resolveKey('gemini-api-key-input', 'GEMINI_API_KEY', 'geminiApiKey', 'Google Gemini AI'); }
+
   function isValidKeyFormat(key) {
     return typeof key === 'string' && key.length >= 20 && /^[A-Za-z0-9_-]+$/.test(key);
   }
 
-  // Expose on global namespace
   window.CivicFlow = window.CivicFlow || {};
   window.CivicFlow.Config = Object.freeze({
     CONFIG,
-    getApiKey,
+    getCivicApiKey,
+    getMapsApiKey,
+    getGeminiApiKey,
     isValidKeyFormat,
   });
 })();

@@ -143,16 +143,21 @@
             Configure API Key
           </button>
           <div class="hidden" id="api-key-panel">
-            <div class="rounded-lg p-4 mb-2" style="background:rgba(6,182,212,0.08);border:1px solid var(--clr-border);">
-              <label for="api-key-input" class="block text-xs font-medium mb-2" style="color:var(--clr-text-muted);">
-                Google Civic Information API Key
-              </label>
-              <input type="password" id="api-key-input" autocomplete="off" spellcheck="false"
-                     placeholder="AIzaSy..."
-                     class="w-full rounded-lg px-4 py-2.5 text-sm"
-                     style="background:var(--clr-bg);border:1px solid var(--clr-border);color:var(--clr-text);font-family:var(--font-primary);" />
+            <div class="rounded-lg p-4 mb-2 space-y-3" style="background:rgba(6,182,212,0.08);border:1px solid var(--clr-border);">
+              <div>
+                <label for="civic-api-key-input" class="block text-xs font-medium mb-1" style="color:var(--clr-text-muted);">Civic Info API Key</label>
+                <input type="password" id="civic-api-key-input" autocomplete="off" class="w-full rounded-lg px-3 py-2 text-sm" style="background:var(--clr-bg);border:1px solid var(--clr-border);color:var(--clr-text);" />
+              </div>
+              <div>
+                <label for="maps-api-key-input" class="block text-xs font-medium mb-1" style="color:var(--clr-text-muted);">Maps JS API Key</label>
+                <input type="password" id="maps-api-key-input" autocomplete="off" class="w-full rounded-lg px-3 py-2 text-sm" style="background:var(--clr-bg);border:1px solid var(--clr-border);color:var(--clr-text);" />
+              </div>
+              <div>
+                <label for="gemini-api-key-input" class="block text-xs font-medium mb-1" style="color:var(--clr-text-muted);">Gemini AI API Key</label>
+                <input type="password" id="gemini-api-key-input" autocomplete="off" class="w-full rounded-lg px-3 py-2 text-sm" style="background:var(--clr-bg);border:1px solid var(--clr-border);color:var(--clr-text);" />
+              </div>
               <p class="text-xs mt-2" style="color:var(--clr-text-muted);">
-                Get a free key at <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" style="color:var(--clr-accent-light);">Google Cloud Console</a>. Your key stays in the browser — never sent to our servers.
+                Your keys stay strictly in the browser. Never committed to the server.
               </p>
             </div>
           </div>
@@ -189,9 +194,9 @@
     <!-- ========== ELECTION 101 WIZARD ========== -->
     <section class="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-20" id="election-101" aria-label="Election 101 interactive wizard">
       <div class="text-center mb-10 animate-fadeInUp">
-        <span class="badge badge--primary mb-4 inline-flex">🎓 Interactive Guide</span>
+        <span class="badge badge--primary mb-4 inline-flex">🤖 AI Assistant</span>
         <h2 class="text-3xl md:text-4xl font-bold mb-3" style="color:var(--clr-text-heading);">
-          Election 101
+          Civic AI Guide
         </h2>
         <p class="max-w-xl mx-auto" style="color:var(--clr-text-muted);">
           A step-by-step wizard to get you fully prepared — from registration to Election Day.

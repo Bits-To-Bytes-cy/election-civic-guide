@@ -9,5 +9,11 @@
 
 window.__CIVIC_CONFIG__ = {
   // Get a free key at https://console.cloud.google.com/apis/credentials
-  apiKey: 'YOUR_API_KEY_HERE'
+  civicApiKey: 'YOUR_CIVIC_API_KEY_HERE',
+  
+  // Maps JS API Key for interactive map embedding
+  mapsApiKey: 'YOUR_MAPS_API_KEY_HERE',
+
+  // Gemini API Key for the AI Chat Assistant (Google AI Studio)
+  geminiApiKey: 'YOUR_GEMINI_API_KEY_HERE'
 };
