@@ -156,6 +156,14 @@
                 <label for="gemini-api-key-input" class="block text-xs font-medium mb-1" style="color:var(--clr-text-muted);">Gemini AI API Key</label>
                 <input type="password" id="gemini-api-key-input" autocomplete="off" class="w-full rounded-lg px-3 py-2 text-sm" style="background:var(--clr-bg);border:1px solid var(--clr-border);color:var(--clr-text);" />
               </div>
+              <div>
+                <label for="translate-api-key-input" class="block text-xs font-medium mb-1" style="color:var(--clr-text-muted);">Translate API Key</label>
+                <input type="password" id="translate-api-key-input" autocomplete="off" class="w-full rounded-lg px-3 py-2 text-sm" style="background:var(--clr-bg);border:1px solid var(--clr-border);color:var(--clr-text);" />
+              </div>
+              <div>
+                <label for="client-id-input" class="block text-xs font-medium mb-1" style="color:var(--clr-text-muted);">Google Client ID</label>
+                <input type="password" id="client-id-input" autocomplete="off" class="w-full rounded-lg px-3 py-2 text-sm" style="background:var(--clr-bg);border:1px solid var(--clr-border);color:var(--clr-text);" />
+              </div>
               <p class="text-xs mt-2" style="color:var(--clr-text-muted);">
                 Your keys stay strictly in the browser. Never committed to the server.
               </p>
@@ -242,10 +250,18 @@
     #address-input:focus { border-color: var(--clr-primary-light) !important; outline: none; }
   </style>
 
-  <!-- App Scripts -->
-  <script src="src/config.js"></script>
-  <script src="src/api.js"></script>
-  <script src="src/ui.js"></script>
-  <script src="src/app.js"></script>
+  <!-- App Scripts (ES Modules) -->
+  <!-- Note: We rely on src/app.js to orchestrate the imports -->
+  <script type="module" src="src/app.js"></script>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    // Note: We use window.__CIVIC_CONFIG__ or the config module to dynamically inject the real Measurement ID later if needed.
+    // For now, it initializes the datalayer so our trackEvent helper works.
+  </script>
 </body>
 </html>

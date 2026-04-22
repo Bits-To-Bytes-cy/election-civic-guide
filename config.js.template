@@ -1,12 +1,3 @@
-/**
- * @fileoverview Civic Flow — Secure Configuration Template
- * 
- * INSTRUCTIONS:
- * 1. Copy this file and rename it to `config.js`.
- * 2. Replace the placeholder below with your actual Google Civic Information API Key.
- * 3. NEVER commit `config.js` to version control.
- */
-
 window.__CIVIC_CONFIG__ = {
   // Get a free key at https://console.cloud.google.com/apis/credentials
   civicApiKey: 'YOUR_CIVIC_API_KEY_HERE',
@@ -15,5 +6,24 @@ window.__CIVIC_CONFIG__ = {
   mapsApiKey: 'YOUR_MAPS_API_KEY_HERE',
 
   // Gemini API Key for the AI Chat Assistant (Google AI Studio)
-  geminiApiKey: 'YOUR_GEMINI_API_KEY_HERE'
+  geminiApiKey: 'YOUR_GEMINI_API_KEY_HERE',
+
+  // Google Cloud Translation API Key
+  translateApiKey: 'YOUR_TRANSLATE_API_KEY_HERE',
+
+  // Google Identity Services Client ID
+  googleClientId: 'YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com',
+
+  // GA4 Measurement ID
+  gaMeasurementId: 'G-XXXXXXXXXX',
+
+  // Firebase Firestore Lite Config
+  firebaseConfig: {
+    apiKey: "YOUR_FIREBASE_API_KEY",
+    authDomain: "your-project.firebaseapp.com",
+    projectId: "your-project",
+    storageBucket: "your-project.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abcdef"
+  }
 };

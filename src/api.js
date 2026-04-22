@@ -1,116 +1,101 @@
 /**
- * @fileoverview Civic Flow — API Handler Module
- *
- * Encapsulates all communication with Google APIs (Civic, Maps, Gemini).
+ * @fileoverview Civic Flow — API Handler Module (ES6 Singleton)
  *
  * @module api
  */
 
-(function () {
-  'use strict';
+import * as Config from './config.js';
 
-  let _cache = new Map();
-  let _lastRequestTime = 0;
-  let _abortController = null;
-
-  function cfg() { return window.CivicFlow.Config.CONFIG; }
+class GoogleServiceManager {
+  constructor() {
+    this._cache = new Map();
+    this._lastRequestTime = 0;
+    this._abortController = null;
+    this.mapsLoaderPromise = null;
+    this.authLoaderPromise = null;
+    this.userToken = null;
+    this.userId = null;
+    this.db = null; // Firestore instance
+  }
 
   /* ==========================================================
-   *  SECURITY
+   *  UTILITIES & SECURITY
    * ========================================================== */
 
-  function sanitizeAddress(raw) {
+  sanitizeAddress(raw) {
     if (typeof raw !== 'string') throw new Error('Address must be a string.');
     let clean = raw.replace(/<[^>]*>/g, '').replace(/[\x00-\x1F\x7F]/g, '').replace(/\s+/g, ' ').trim();
     if (clean.length === 0) throw new Error('Please enter a valid address.');
-    if (clean.length > cfg().MAX_ADDRESS_LENGTH) throw new Error(`Address must be under ${cfg().MAX_ADDRESS_LENGTH} characters.`);
+    if (clean.length > Config.CONFIG.MAX_ADDRESS_LENGTH) throw new Error(`Address must be under ${Config.CONFIG.MAX_ADDRESS_LENGTH} chars.`);
     if (!/[a-zA-Z]/.test(clean) || !/\d/.test(clean)) throw new Error('Please enter a complete street address.');
     return clean;
   }
 
-  function escapeHTML(str) {
+  escapeHTML(str) {
     const div = document.createElement('div');
     div.appendChild(document.createTextNode(str));
     return div.innerHTML;
   }
 
-  /* ==========================================================
-   *  CACHING & RATE LIMITING
-   * ========================================================== */
-
-  function getCacheKey(address) { return 'civic_' + address.toLowerCase().replace(/\s+/g, '_'); }
-  function getFromCache(key) {
-    const entry = _cache.get(key);
-    if (!entry) return null;
-    if (Date.now() - entry.timestamp > cfg().CACHE_TTL_MS) { _cache.delete(key); return null; }
-    return entry.data;
-  }
-  function setCache(key, data) {
-    if (_cache.size >= cfg().MAX_CACHE_SIZE) _cache.delete(_cache.keys().next().value);
-    _cache.set(key, { data, timestamp: Date.now() });
-  }
-  function clearCache() { _cache.clear(); }
-
-  function enforceRateLimit() {
+  enforceRateLimit() {
     const now = Date.now();
-    const elapsed = now - _lastRequestTime;
-    if (elapsed < cfg().RATE_LIMIT_MS) {
-      throw new Error(`Please wait ${Math.ceil((cfg().RATE_LIMIT_MS - elapsed) / 1000)}s before searching again.`);
+    if (now - this._lastRequestTime < Config.CONFIG.RATE_LIMIT_MS) {
+      throw new Error('Please wait before searching again.');
     }
-    _lastRequestTime = now;
+    this._lastRequestTime = now;
+  }
+
+  trackEvent(eventName, params = {}) {
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', eventName, params);
+    }
   }
 
   /* ==========================================================
    *  CIVIC INFO API
    * ========================================================== */
 
-  async function fetchVoterInfo(address) {
-    if (_abortController) _abortController.abort();
-    _abortController = new AbortController();
+  async lookupAddress(rawAddress) {
+    const address = this.sanitizeAddress(rawAddress);
+    const cacheKey = 'civic_' + address.toLowerCase().replace(/\s+/g, '_');
+    
+    if (this._cache.has(cacheKey)) return this._cache.get(cacheKey).data;
+    this.enforceRateLimit();
 
-    const apiKey = window.CivicFlow.Config.getCivicApiKey();
-    const url = `${cfg().BASE_URL}/voterinfo?key=${apiKey}&address=${encodeURIComponent(address)}&electionId=`;
+    if (this._abortController) this._abortController.abort();
+    this._abortController = new AbortController();
 
-    const timeoutId = setTimeout(() => _abortController.abort(), cfg().REQUEST_TIMEOUT_MS);
+    const apiKey = Config.getCivicApiKey();
+    const url = `${Config.CONFIG.BASE_URL}/voterinfo?key=${apiKey}&address=${encodeURIComponent(address)}&electionId=`;
 
     try {
-      const res = await fetch(url, { signal: _abortController.signal, headers: { 'Accept': 'application/json' } });
-      clearTimeout(timeoutId);
-      if (!res.ok) await _handleHttpError(res);
-      return await res.json();
-    } catch (err) {
-      clearTimeout(timeoutId);
-      if (err.name === 'AbortError') throw new Error('Request timed out. Please check your connection.');
-      throw err;
+      const res = await fetch(url, { signal: this._abortController.signal, headers: { 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error(`Civic API error (${res.status})`);
+      const raw = await res.json();
+      
+      const parsed = this.parseVoterInfo(raw);
+      this._cache.set(cacheKey, { data: parsed, timestamp: Date.now() });
+      
+      this.trackEvent('election_search_complete', { has_election: !!parsed.election });
+      return parsed;
     } finally {
-      _abortController = null;
+      this._abortController = null;
     }
   }
 
-  async function _handleHttpError(res) {
-    const body = await res.json().catch(() => ({}));
-    const fallback = body?.error?.message || `API error (${res.status})`;
-    const messages = {
-      400: 'No election info found for this address.',
-      403: 'API key is invalid or exceeded quota.',
-      429: 'Too many requests.',
-    };
-    throw new Error(messages[res.status] || fallback);
-  }
-
-  function parseVoterInfo(raw) {
+  parseVoterInfo(raw) {
     const result = { election: null, pollingLocations: [], earlyVoteSites: [], dropOffLocations: [] };
     if (raw.election && raw.election.id !== '0') {
-      result.election = { name: escapeHTML(raw.election.name || 'Upcoming Election'), date: raw.election.electionDay || '' };
+      result.election = { name: this.escapeHTML(raw.election.name || 'Election'), date: raw.election.electionDay || '' };
     }
     const parseLoc = (loc) => {
       const addr = loc.address || {};
       const full = [addr.line1, addr.line2, addr.city, addr.state, addr.zip].filter(Boolean).join(', ');
       return {
-        name: escapeHTML(addr.locationName || 'Polling Location'),
-        address: escapeHTML(full),
-        hours: escapeHTML(loc.pollingHours || 'Contact local office'),
-        mapsUrl: buildMapsUrl(full)
+        name: this.escapeHTML(addr.locationName || 'Polling Location'),
+        address: this.escapeHTML(full),
+        hours: this.escapeHTML(loc.pollingHours || 'Contact local office'),
+        mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(full)}`
       };
     };
     if (Array.isArray(raw.pollingLocations)) result.pollingLocations = raw.pollingLocations.map(parseLoc);
@@ -119,108 +104,137 @@
     return result;
   }
 
-  async function lookupAddress(rawAddress) {
-    const address = sanitizeAddress(rawAddress);
-    const cacheKey = getCacheKey(address);
-    const cached = getFromCache(cacheKey);
-    if (cached) return cached;
-    enforceRateLimit();
-    const raw = await fetchVoterInfo(address);
-    const parsed = parseVoterInfo(raw);
-    setCache(cacheKey, parsed);
-    return parsed;
+  buildCalendarUrl(electionName, dateStr) {
+    if (!dateStr) return '#';
+    const d = dateStr.replace(/-/g, '');
+    const p = new URLSearchParams({ action: 'TEMPLATE', text: electionName, dates: `${d}/${d}` });
+    return `https://calendar.google.com/calendar/render?${p.toString()}`;
   }
 
   /* ==========================================================
    *  GOOGLE MAPS API
    * ========================================================== */
 
-  let mapsLoaderPromise = null;
-  function loadGoogleMaps() {
-    if (mapsLoaderPromise) return mapsLoaderPromise;
-    mapsLoaderPromise = new Promise((resolve, reject) => {
-      if (window.google && window.google.maps) { resolve(); return; }
+  loadGoogleMaps() {
+    if (this.mapsLoaderPromise) return this.mapsLoaderPromise;
+    this.mapsLoaderPromise = new Promise((resolve, reject) => {
+      if (window.google && window.google.maps) return resolve();
       try {
-        const key = window.CivicFlow.Config.getMapsApiKey();
+        const key = Config.getMapsApiKey();
         const script = document.createElement('script');
         script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&loading=async&callback=Function.prototype`;
-        script.async = true;
-        script.defer = true;
-        script.onload = resolve;
-        script.onerror = () => reject(new Error('Failed to load Google Maps'));
+        script.async = true; script.defer = true;
+        script.onload = resolve; script.onerror = () => reject(new Error('Failed to load Maps'));
         document.head.appendChild(script);
       } catch (e) { reject(e); }
     });
-    return mapsLoaderPromise;
+    return this.mapsLoaderPromise;
   }
 
-  async function renderMap(container, addressStr, title) {
-    await loadGoogleMaps();
+  async renderMap(container, addressStr, title) {
+    await this.loadGoogleMaps();
     const geocoder = new window.google.maps.Geocoder();
     return new Promise((resolve, reject) => {
       geocoder.geocode({ address: addressStr }, (results, status) => {
         if (status === 'OK' && results[0]) {
-          const map = new window.google.maps.Map(container, {
-            zoom: 15, center: results[0].geometry.location, disableDefaultUI: true, zoomControl: true
-          });
-          new window.google.maps.Marker({ map, position: results[0].geometry.location, title: title });
+          const map = new window.google.maps.Map(container, { zoom: 15, center: results[0].geometry.location, disableDefaultUI: true });
+          new window.google.maps.Marker({ map, position: results[0].geometry.location, title });
           resolve(map);
-        } else {
-          reject(new Error('Geocode failed: ' + status));
-        }
+        } else reject(new Error('Geocode failed'));
       });
     });
   }
 
-  function buildMapsUrl(address) {
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
-  }
-
   /* ==========================================================
-   *  GOOGLE CALENDAR API (Template URLs)
+   *  GOOGLE GEMINI & TRANSLATE APIs
    * ========================================================== */
 
-  function buildCalendarUrl(electionName, dateStr, location) {
-    if (!dateStr) return '#';
-    const d = dateStr.replace(/-/g, '');
-    const params = new URLSearchParams({
-      action: 'TEMPLATE', text: electionName || 'Election Day', dates: `${d}/${d}`,
-      details: `Reminder: ${electionName}. Make sure to vote!\n\nPowered by Civic Flow`,
-    });
-    if (location) params.set('location', location);
-    return `https://calendar.google.com/calendar/render?${params.toString()}`;
-  }
-
-  /* ==========================================================
-   *  GEMINI API
-   * ========================================================== */
-
-  async function askGemini(promptText) {
-    const key = window.CivicFlow.Config.getGeminiApiKey();
+  async askGemini(promptText) {
+    const key = Config.getGeminiApiKey();
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent?key=${encodeURIComponent(key)}`;
-    const payload = {
-      contents: [{
-        parts: [{ text: "You are a nonpartisan civic assistant. Provide a brief, factual answer about U.S. elections.\n\nUser: " + promptText }]
-      }]
-    };
-    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    if (!res.ok) throw new Error(`Gemini API Error: ${res.status}`);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: "Nonpartisan civic assistant. Answer:\n" + promptText }] }] })
+    });
+    if (!res.ok) throw new Error(`Gemini Error: ${res.status}`);
     const data = await res.json();
-    try {
-      return data.candidates[0].content.parts[0].text;
-    } catch (e) {
-      throw new Error('Failed to parse Gemini response.');
-    }
+    this.trackEvent('ai_advice_requested');
+    return data.candidates[0].content.parts[0].text;
+  }
+
+  async translateText(text, targetLang) {
+    if (targetLang === 'en') return text;
+    const key = Config.getTranslateApiKey();
+    const url = `https://translation.googleapis.com/language/translate/v2?key=${encodeURIComponent(key)}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ q: text, target: targetLang, format: 'text' })
+    });
+    if (!res.ok) throw new Error('Translation failed');
+    const data = await res.json();
+    return data.data.translations[0].translatedText;
   }
 
   /* ==========================================================
-   *  EXPORTS
+   *  LAZY AUTH & FIRESTORE LITE
    * ========================================================== */
 
-  window.CivicFlow = window.CivicFlow || {};
-  window.CivicFlow.API = Object.freeze({
-    lookupAddress, parseVoterInfo, sanitizeAddress, escapeHTML,
-    buildMapsUrl, buildCalendarUrl, clearCache,
-    loadGoogleMaps, renderMap, askGemini
-  });
-})();
+  signIn() {
+    if (this.authLoaderPromise) return this.authLoaderPromise;
+    this.authLoaderPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true; script.defer = true;
+      script.onload = () => {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: Config.getGoogleClientId(),
+            callback: (res) => {
+              this.userToken = res.credential;
+              // Decode JWT payload for user ID
+              const payload = JSON.parse(atob(res.credential.split('.')[1]));
+              this.userId = payload.sub;
+              resolve(payload);
+            }
+          });
+          window.google.accounts.id.prompt((notification) => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+              reject(new Error('Sign-in prompt failed to display or was skipped.'));
+            }
+          });
+        } catch (e) { reject(e); }
+      };
+      script.onerror = () => reject(new Error('Failed to load Google Auth'));
+      document.head.appendChild(script);
+    });
+    return this.authLoaderPromise;
+  }
+
+  async initFirestore() {
+    if (this.db) return this.db;
+    const firebaseConfig = Config.getFirebaseConfig();
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.9.0/firebase-app-lite.js');
+    const { getFirestore } = await import('https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-lite.js');
+    const app = initializeApp(firebaseConfig);
+    this.db = getFirestore(app);
+    return this.db;
+  }
+
+  async saveUserPlan(planText) {
+    if (!this.userId) throw new Error('You must be signed in to save a plan.');
+    await this.initFirestore();
+    const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-lite.js');
+    
+    await addDoc(collection(this.db, 'user_plans'), {
+      uid: this.userId,
+      plan: planText,
+      timestamp: Date.now()
+    });
+    
+    this.trackEvent('plan_saved');
+  }
+}
+
+export const Services = new GoogleServiceManager();
