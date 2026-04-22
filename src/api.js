@@ -76,7 +76,6 @@ class GoogleServiceManager {
       const parsed = this.parseVoterInfo(raw);
       this._cache.set(cacheKey, { data: parsed, timestamp: Date.now() });
       
-      this.trackEvent('election_search_complete', { has_election: !!parsed.election });
       return parsed;
     } finally {
       this._abortController = null;
@@ -225,13 +224,13 @@ class GoogleServiceManager {
   async saveUserPlan(planText) {
     if (!this.userId) throw new Error('You must be signed in to save a plan.');
     await this.initFirestore();
-    const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-lite.js');
+    const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-lite.js');
     
-    await addDoc(collection(this.db, 'user_plans'), {
+    await setDoc(doc(this.db, 'user_plans', this.userId), {
       uid: this.userId,
       plan: planText,
       timestamp: Date.now()
-    });
+    }, { merge: true });
     
     this.trackEvent('plan_saved');
   }

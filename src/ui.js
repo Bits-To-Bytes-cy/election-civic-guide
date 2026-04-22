@@ -63,99 +63,94 @@ function renderLoading(show) {
 function renderWizard() {
   const root = $('#election-wizard-root');
   if (!root) return;
-  
-  root.innerHTML = `
-    <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-      <h3 class="text-xl font-bold" style="color:var(--clr-text-heading)">🤖 Civic AI Assistant</h3>
-      <div class="flex gap-2 items-center">
-        <select id="lang-select" class="text-xs p-1 rounded border">
-          <option value="en">English</option>
-          <option value="es">Español</option>
-          <option value="hi">हिन्दी</option>
-        </select>
-        <button id="auth-btn" class="btn-outline text-xs py-1 px-3" aria-label="Sign in with Google to save plan">Sign In to Save</button>
-      </div>
-    </div>
-    <div id="chat-history" class="mb-4 space-y-3" style="max-height: 300px; overflow-y: auto; padding-right: 10px;">
-      <div class="p-3 rounded-lg" style="background:rgba(79,70,229,0.1); border:1px solid var(--clr-primary-light);">
-        <p class="text-sm" style="color:var(--clr-text)" id="greeting-text"><strong>AI:</strong> Hello! Ask me about voting!</p>
-      </div>
-    </div>
-    <form id="chat-form" class="flex gap-2">
-      <input type="text" id="chat-input" placeholder="Type your question..." class="flex-1 rounded-lg px-4 py-2 text-sm" style="background:var(--clr-bg);border:1px solid var(--clr-border);color:var(--clr-text);" required autocomplete="off" />
-      <button type="submit" class="btn-primary px-4 py-2 text-sm" id="chat-btn">Send</button>
-    </form>
-    <div class="mt-4 hidden" id="save-plan-container">
-      <button id="save-plan-btn" class="btn-outline text-xs w-full py-2">💾 Save Latest Plan to Firestore</button>
-    </div>
-  `;
+
+  // Add a custom sign-in button to the container since script is lazy-loaded
+  const authContainer = $('#google-auth-container');
+  if (authContainer) {
+    authContainer.innerHTML = `<button id="custom-auth-btn" class="btn-outline text-xs py-1 px-3" aria-label="Sign in with Google to save plan">Sign In to Save</button>`;
+  }
 
   let lastAiResponse = '';
 
-  $('#lang-select').addEventListener('change', async (e) => {
-    const lang = e.target.value;
-    try {
-      const el = $('#greeting-text');
-      const text = await Services.translateText('Hello! Ask me about voting!', lang);
-      el.innerHTML = `<strong>AI:</strong> ${Services.escapeHTML(text)}`;
-    } catch (err) { console.error('Translation failed', err); }
-  });
+  const langPicker = $('#language-picker');
+  if (langPicker) {
+    langPicker.addEventListener('change', async (e) => {
+      const lang = e.target.value;
+      try {
+        const el = $('#greeting-text');
+        if (el) {
+          const text = await Services.translateText('Hello! Ask me about voting!', lang);
+          el.innerHTML = `<strong>AI:</strong> ${Services.escapeHTML(text)}`;
+        }
+      } catch (err) { console.error('Translation failed', err); }
+    });
+  }
 
-  $('#auth-btn').addEventListener('click', async (e) => {
-    try {
-      e.target.textContent = 'Signing in...';
-      const user = await Services.signIn();
-      e.target.textContent = `Signed in as ${user.name}`;
-      e.target.disabled = true;
-      $('#save-plan-container').classList.remove('hidden');
-    } catch (err) {
-      e.target.textContent = 'Sign In Failed';
-      console.error(err);
-    }
-  });
-
-  $('#save-plan-btn').addEventListener('click', async (e) => {
-    if (!lastAiResponse) return alert('No plan to save yet.');
-    try {
-      e.target.textContent = 'Saving...';
-      await Services.saveUserPlan(lastAiResponse);
-      e.target.textContent = '✅ Saved!';
-      setTimeout(() => e.target.textContent = '💾 Save Latest Plan to Firestore', 3000);
-    } catch (err) {
-      alert('Failed to save plan: ' + err.message);
-      e.target.textContent = '💾 Save Latest Plan to Firestore';
-    }
-  });
-
-  $('#chat-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const input = $('#chat-input');
-    const msg = input.value.trim();
-    if (!msg) return;
-
-    appendChatMessage('You', msg);
-    input.value = '';
-    const btn = $('#chat-btn');
-    btn.disabled = true;
-
-    try {
-      let reply = await Services.askGemini(msg);
-      const lang = $('#lang-select').value;
-      if (lang !== 'en') {
-        reply = await Services.translateText(reply, lang);
+  const customAuthBtn = $('#custom-auth-btn');
+  if (customAuthBtn) {
+    customAuthBtn.addEventListener('click', async (e) => {
+      try {
+        e.target.textContent = 'Signing in...';
+        const user = await Services.signIn();
+        e.target.textContent = `Signed in as ${user.name}`;
+        e.target.disabled = true;
+        const saveBtn = $('#save-plan-btn');
+        if (saveBtn) saveBtn.classList.remove('hidden');
+      } catch (err) {
+        e.target.textContent = 'Sign In Failed';
+        console.error(err);
       }
-      lastAiResponse = reply;
-      appendChatMessage('AI', reply);
-    } catch (err) {
-      appendChatMessage('Error', err.message);
-    } finally {
-      btn.disabled = false;
-    }
-  });
+    });
+  }
+
+  const savePlanBtn = $('#save-plan-btn');
+  if (savePlanBtn) {
+    savePlanBtn.addEventListener('click', async (e) => {
+      if (!lastAiResponse) return alert('No plan to save yet.');
+      try {
+        e.target.textContent = 'Saving...';
+        await Services.saveUserPlan(lastAiResponse);
+        e.target.textContent = '✅ Saved!';
+        setTimeout(() => e.target.textContent = 'Save Plan to Profile', 3000);
+      } catch (err) {
+        alert('Failed to save plan: ' + err.message);
+        e.target.textContent = 'Save Plan to Profile';
+      }
+    });
+  }
+
+  const chatForm = $('#chat-form');
+  if (chatForm) {
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = $('#chat-input');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      appendChatMessage('You', msg);
+      input.value = '';
+      const btn = $('#send-btn');
+      if (btn) btn.disabled = true;
+
+      try {
+        let reply = await Services.askGemini(msg);
+        const lang = langPicker ? langPicker.value : 'en';
+        if (lang !== 'en') {
+          reply = await Services.translateText(reply, lang);
+        }
+        lastAiResponse = reply;
+        appendChatMessage('AI', reply);
+      } catch (err) {
+        appendChatMessage('Error', err.message);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+  }
 }
 
 function appendChatMessage(sender, text) {
-  const hist = $('#chat-history');
+  const hist = $('#chat-window');
   if (!hist) return;
   const isUser = sender === 'You';
   const bg = isUser ? 'rgba(255,255,255,0.05)' : 'rgba(79,70,229,0.1)';
