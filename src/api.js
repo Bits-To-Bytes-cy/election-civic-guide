@@ -196,7 +196,17 @@
    * ========================================================== */
 
   async function askGemini(promptText) {
-    const key = window.CivicFlow.Config.getGeminiApiKey();
+    // ── Graceful fail: check for a valid key before making the network call ──
+    let key;
+    try {
+      key = window.CivicFlow.Config.getGeminiApiKey();
+    } catch (_) {
+      key = '';
+    }
+    if (!key || key === 'PASTE_YOUR_GEMINI_KEY_HERE' || key.includes('YOUR_')) {
+      return 'Please configure your Gemini API Key in the settings to use the AI Guide. Click "Configure API Key" above the search bar to add it.';
+    }
+
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent?key=${encodeURIComponent(key)}`;
     const payload = {
       contents: [{

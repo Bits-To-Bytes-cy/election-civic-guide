@@ -104,29 +104,43 @@
 
     const all = [...data.pollingLocations, ...data.earlyVoteSites, ...data.dropOffLocations];
     if (all.length > 0) {
-      const loc = all[0]; // Display the first location on the map for simplicity
+      const loc = all[0];
       html += `
         <div class="card p-5 animate-fadeInUp">
           <h4 class="font-semibold" style="color:var(--clr-text-heading)">📍 ${loc.name}</h4>
           <p class="text-sm mb-1" style="color:var(--clr-text-muted)">${loc.address}</p>
           <p class="text-sm mb-3" style="color:var(--clr-text-muted)">🕐 ${loc.hours}</p>
-          <div id="map-container" style="width: 100%; height: 250px; border-radius: 8px; background: #eee; margin-top: 10px;">
-            <p style="padding: 20px; text-align: center; color: #666;">Loading Map...</p>
+          <div id="map-container" style="width:100%;height:400px;border-radius:12px;background:#1e293b;margin-top:12px;display:flex;align-items:center;justify-content:center;">
+            <p style="color:#94a3b8;font-size:0.875rem;">Loading interactive map…</p>
           </div>
+          <a href="${loc.mapsUrl}" target="_blank" rel="noopener noreferrer" class="btn-outline inline-flex items-center gap-2 text-sm no-underline mt-3">
+            Open in Google Maps ↗
+          </a>
         </div>`;
-      
-      // Async map rendering after HTML injection
+
+      // Async: load Maps JS API and render marker after DOM injection
       setTimeout(() => {
         const mapEl = $('#map-container');
         if (mapEl) {
           API.renderMap(mapEl, loc.address, loc.name).catch(err => {
-            mapEl.innerHTML = `<p style="padding: 20px; text-align: center; color: red;">Map error: ${err.message}</p>`;
+            mapEl.innerHTML = `
+              <div style="padding:24px;text-align:center;">
+                <p style="color:#f87171;font-size:0.875rem;margin-bottom:8px;">⚠️ Could not load map: ${API.escapeHTML(err.message)}</p>
+                <a href="${loc.mapsUrl}" target="_blank" rel="noopener noreferrer" style="color:var(--clr-accent-light);font-size:0.8rem;text-decoration:underline;">View on Google Maps instead →</a>
+              </div>`;
           });
         }
-      }, 50);
+      }, 100);
+    } else if (!data.election) {
+      // No election AND no locations — show a clear "not found" message
+      html += `
+        <div class="card p-6 text-center animate-fadeIn" style="border-color:var(--clr-border);">
+          <p class="text-base mb-2" style="color:var(--clr-text-heading);">📭 No polling data found for this address</p>
+          <p class="text-sm" style="color:var(--clr-text-muted);">There may not be an upcoming election in your area, or the address could not be matched. Try entering your full street address including city and state.</p>
+        </div>`;
     }
-    
-    container.innerHTML = html || `<div class="card p-6 text-center"><p>No Results Found</p></div>`;
+
+    container.innerHTML = html || `<div class="card p-6 text-center animate-fadeIn"><p style="color:var(--clr-text-muted);">📭 No polling data found for this address. Please try a full street address.</p></div>`;
   }
 
   function renderError(message) {

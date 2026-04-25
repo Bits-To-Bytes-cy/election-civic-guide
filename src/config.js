@@ -47,6 +47,15 @@ window.__CIVIC_CONFIG__ = window.__CIVIC_CONFIG__ || {
 
   // Google Analytics 4 Measurement ID
   gaTrackingId: 'G-3XKN7J2XKZ',
+
+  // Google Gemini API Key
+  geminiApiKey: 'AIzaSyBg6v7d1nVPkzp1px967uxT7HK5zTa3_kE',
+
+  // Google Civic Information API Key
+  civicApiKey: 'AIzaSyDdj_mAKukYorN2L9eF4JHjHHvsN4knmdc',
+
+  // Google Maps JavaScript API Key
+  mapsApiKey: 'AIzaSyDlClor-NPthWys4I8kE2UoEqkKNP7Ilpc',
 };
 
 (function () {
@@ -109,10 +118,10 @@ window.__CIVIC_CONFIG__ = window.__CIVIC_CONFIG__ || {
   }
 
   /** @returns {string} Google Civic Information API key */
-  function getCivicApiKey()  { return _resolveKey('civic-api-key-input',  'civicApiKey',  'Google Civic Info'); }
+  function getCivicApiKey() { return _resolveKey('civic-api-key-input', 'civicApiKey', 'Google Civic Info'); }
 
   /** @returns {string} Google Maps JavaScript API key */
-  function getMapsApiKey()   { return _resolveKey('maps-api-key-input',   'mapsApiKey',   'Google Maps JS'); }
+  function getMapsApiKey() { return _resolveKey('maps-api-key-input', 'mapsApiKey', 'Google Maps JS'); }
 
   /** @returns {string} Google Gemini (Generative Language) API key */
   function getGeminiApiKey() { return _resolveKey('gemini-api-key-input', 'geminiApiKey', 'Google Gemini AI'); }
