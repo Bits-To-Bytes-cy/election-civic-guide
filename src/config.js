@@ -31,31 +31,27 @@
 // ── Production Service Configuration ──
 // These client-side identifiers are resolved by the key resolver below.
 window.__CIVIC_CONFIG__ = window.__CIVIC_CONFIG__ || {
-  // Google OAuth 2.0 Client ID (Google Identity Services)
-  googleClientId: '1053254608655-dumuhbje2cpm6u1erohqth9a50ipb47q.apps.googleusercontent.com',
+  // === Google Identity Services ===
+  googleClientId: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
 
-  // Firebase / Firestore configuration
+  // === Firebase / Firestore ===
   firebaseConfig: {
-    apiKey: 'AIzaSyAbV24sHal47ArD1RJbdTITCZGXbzX3_D0',
-    authDomain: 'civic-flow1.firebaseapp.com',
-    projectId: 'civic-flow1',
-    storageBucket: 'civic-flow1.firebasestorage.app',
-    messagingSenderId: '284914344014',
-    appId: '1:284914344014:web:5a0fa31d74861dd9e2e31f',
-    measurementId: 'G-3XKN7J2XKZ',
+    apiKey: 'YOUR_FIREBASE_API_KEY',
+    authDomain: 'YOUR_PROJECT.firebaseapp.com',
+    projectId: 'YOUR_PROJECT_ID',
+    storageBucket: 'YOUR_PROJECT.firebasestorage.app',
+    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    appId: 'YOUR_APP_ID',
+    measurementId: 'YOUR_MEASUREMENT_ID',
   },
 
-  // Google Analytics 4 Measurement ID
-  gaTrackingId: 'G-3XKN7J2XKZ',
+  // === Google Analytics 4 ===
+  gaTrackingId: 'YOUR_GA_TRACKING_ID',
 
-  // Google Gemini API Key
-  geminiApiKey: 'AIzaSyBg6v7d1nVPkzp1px967uxT7HK5zTa3_kE',
-
-  // Google Civic Information API Key
-  civicApiKey: 'AIzaSyDdj_mAKukYorN2L9eF4JHjHHvsN4knmdc',
-
-  // Google Maps JavaScript API Key
-  mapsApiKey: 'AIzaSyDlClor-NPthWys4I8kE2UoEqkKNP7Ilpc',
+  // === Google APIs ===
+  geminiApiKey: 'YOUR_GEMINI_API_KEY',
+  civicApiKey: 'YOUR_CIVIC_API_KEY',
+  mapsApiKey: 'YOUR_MAPS_API_KEY',
 };
 
 (function () {
