@@ -2,15 +2,52 @@
  * @fileoverview Civic Flow — Secure Configuration Module
  *
  * Centralises all application configuration and API key management.
- * Supports 6 Google Services: Civic Info, Maps JS, Gemini AI,
- * Google Identity (Auth), Firebase Firestore (Storage), and GA4 (Analytics).
+ * Supports 7 Google Services: Civic Info, Maps JS, Gemini AI,
+ * Google Identity (Auth), Firebase Firestore (Storage), GA4 (Analytics),
+ * and Google Calendar.
  *
- * SECURITY: No API key is ever hardcoded. Keys are resolved from:
- *   1. Runtime UI input fields (browser-only, never persisted)
- *   2. window.__CIVIC_CONFIG__ (loaded from config.js, which is .gitignored)
+ * ┌──────────────────────────────────────────────────────────────────┐
+ * │  SECURITY NOTE — Firebase Client-Side Keys                      │
+ * │                                                                  │
+ * │  The Firebase API key and configuration below are CLIENT-SIDE    │
+ * │  identifiers. They are designed by Google to be embedded in      │
+ * │  public-facing code (web apps, mobile apps). They do NOT grant   │
+ * │  privileged access on their own.                                 │
+ * │                                                                  │
+ * │  All data security is enforced server-side via:                  │
+ * │    1. Firestore Security Rules (see storage.js and README.md)    │
+ * │       — Only authenticated users can read/write their own data.  │
+ * │    2. Firebase App Check (recommended for production hardening). │
+ * │    3. API key restrictions in Google Cloud Console               │
+ * │       (HTTP referrer, API scope limits).                         │
+ * │                                                                  │
+ * │  The Google OAuth Client ID is also a public identifier and is   │
+ * │  safe to include in client-side code per Google's documentation. │
+ * └──────────────────────────────────────────────────────────────────┘
  *
  * @module config
  */
+
+// ── Production Service Configuration ──
+// These client-side identifiers are resolved by the key resolver below.
+window.__CIVIC_CONFIG__ = window.__CIVIC_CONFIG__ || {
+  // Google OAuth 2.0 Client ID (Google Identity Services)
+  googleClientId: '1053254608655-dumuhbje2cpm6u1erohqth9a50ipb47q.apps.googleusercontent.com',
+
+  // Firebase / Firestore configuration
+  firebaseConfig: {
+    apiKey: 'AIzaSyAbV24sHal47ArD1RJbdTITCZGXbzX3_D0',
+    authDomain: 'civic-flow1.firebaseapp.com',
+    projectId: 'civic-flow1',
+    storageBucket: 'civic-flow1.firebasestorage.app',
+    messagingSenderId: '284914344014',
+    appId: '1:284914344014:web:5a0fa31d74861dd9e2e31f',
+    measurementId: 'G-3XKN7J2XKZ',
+  },
+
+  // Google Analytics 4 Measurement ID
+  gaTrackingId: 'G-3XKN7J2XKZ',
+};
 
 (function () {
   'use strict';
