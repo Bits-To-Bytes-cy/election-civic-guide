@@ -1,19 +1,38 @@
 /**
  * @fileoverview Civic Flow — Secure Configuration Template
- * 
+ *
  * INSTRUCTIONS:
  * 1. Copy this file and rename it to `config.js`.
- * 2. Replace the placeholder below with your actual Google Civic Information API Key.
- * 3. NEVER commit `config.js` to version control.
+ * 2. Replace all placeholders below with your actual keys.
+ * 3. NEVER commit `config.js` to version control — it is in .gitignore.
  */
 
 window.__CIVIC_CONFIG__ = {
-  // Get a free key at https://console.cloud.google.com/apis/credentials
+  // === Google Civic Information API ===
+  // Enable at: https://console.cloud.google.com/apis/library/civicinfo.googleapis.com
   civicApiKey: 'YOUR_CIVIC_API_KEY_HERE',
-  
-  // Maps JS API Key for interactive map embedding
+
+  // === Google Maps JavaScript API ===
+  // Enable at: https://console.cloud.google.com/apis/library/maps-backend.googleapis.com
   mapsApiKey: 'YOUR_MAPS_API_KEY_HERE',
 
-  // Gemini API Key for the AI Chat Assistant (Google AI Studio)
-  geminiApiKey: 'YOUR_GEMINI_API_KEY_HERE'
+  // === Google Gemini (Generative Language) API ===
+  // Get a key at: https://aistudio.google.com/apikey
+  geminiApiKey: 'YOUR_GEMINI_API_KEY_HERE',
+
+  // === Google Identity Services (OAuth 2.0 Client ID) ===
+  // Create at: https://console.cloud.google.com/apis/credentials → OAuth 2.0 Client IDs
+  googleClientId: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+
+  // === Firebase / Firestore (Cloud Storage for Election Plans) ===
+  // Create a project at: https://console.firebase.google.com
+  firebaseConfig: {
+    apiKey: 'YOUR_FIREBASE_API_KEY',
+    authDomain: 'YOUR_PROJECT.firebaseapp.com',
+    projectId: 'YOUR_PROJECT_ID'
+  },
+
+  // === Google Analytics 4 ===
+  // Create a GA4 property at: https://analytics.google.com
+  gaTrackingId: 'G-XXXXXXXXXX'
 };

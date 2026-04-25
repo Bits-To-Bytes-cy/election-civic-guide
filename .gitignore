@@ -2,7 +2,7 @@
 .env
 .env.local
 .env.production
-config.js
+/config.js
 
 # Dependencies
 node_modules/

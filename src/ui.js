@@ -68,8 +68,38 @@
         <div class="card p-6 mb-4 animate-fadeInUp">
           <h3 class="text-lg font-bold">${data.election.name}</h3>
           <p class="text-sm mb-3">${data.election.date || 'Date not available'}</p>
-          <a href="${calUrl}" target="_blank" class="btn-primary text-sm no-underline">Save to Calendar</a>
+          <div class="flex flex-wrap gap-2">
+            <a href="${calUrl}" target="_blank" class="btn-primary text-sm no-underline">Save to Calendar</a>
+            <button class="btn-outline text-sm" id="save-plan-btn" aria-label="Save this election plan to your Google account">
+              💾 Save Plan
+            </button>
+          </div>
         </div>`;
+
+      // Wire save plan button after DOM injection
+      setTimeout(() => {
+        const saveBtn = document.getElementById('save-plan-btn');
+        if (saveBtn) {
+          saveBtn.addEventListener('click', async () => {
+            if (!window.CivicFlow.Storage) { alert('Storage module not loaded.'); return; }
+            try {
+              saveBtn.textContent = 'Saving...';
+              saveBtn.disabled = true;
+              await window.CivicFlow.Storage.saveElectionPlan({
+                address: document.getElementById('address-input')?.value || '',
+                electionName: data.election.name,
+                electionDate: data.election.date,
+                pollingLocation: data.pollingLocations?.[0]?.address || ''
+              });
+              saveBtn.textContent = '✅ Saved!';
+            } catch (err) {
+              saveBtn.textContent = '💾 Save Plan';
+              saveBtn.disabled = false;
+              alert(err.message);
+            }
+          });
+        }
+      }, 50);
     }
 
     const all = [...data.pollingLocations, ...data.earlyVoteSites, ...data.dropOffLocations];
@@ -147,6 +177,11 @@
       try {
         const reply = await window.CivicFlow.API.askGemini(msg);
         appendChatMessage('AI', reply);
+
+        // ── GA4: track the AI query event ──
+        if (window.CivicFlow.Analytics) {
+          window.CivicFlow.Analytics.trackEvent('ai_query', { query_topic: msg.substring(0, 50) });
+        }
       } catch (err) {
         appendChatMessage('Error', err.message);
       } finally {
