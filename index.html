@@ -15,37 +15,14 @@
   <link rel="stylesheet" href="src/styles.css" />
 
   <!-- Google Analytics 4 (gtag.js) — loaded async for performance -->
-  <script async defer src="https://www.googletagmanager.com/gtag/js?id=G-3XKN7J2XKZ"></script>
+  <script async defer src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
-    gtag('config', 'G-3XKN7J2XKZ', { send_page_view: true });
-  </script>
-
-  <!-- Firebase SDK (modular, via CDN — loaded async for performance) -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js';
-    import { getAnalytics } from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-analytics.js';
-    import { getFirestore } from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore-lite.js';
-
-    // Firebase is initialized after config.js loads window.__CIVIC_CONFIG__
-    window.addEventListener('DOMContentLoaded', () => {
-      try {
-        const cfg = window.__CIVIC_CONFIG__?.firebaseConfig;
-        if (cfg && cfg.projectId && !cfg.projectId.includes('YOUR_')) {
-          const app = initializeApp(cfg);
-          const analytics = getAnalytics(app);
-          const db = getFirestore(app);
-          // Expose for use by storage.js
-          window.__FIREBASE_APP__ = app;
-          window.__FIREBASE_DB__ = db;
-          console.log('[Firebase] Initialized:', cfg.projectId);
-        }
-      } catch (e) {
-        console.warn('[Firebase] Init skipped:', e.message);
-      }
-    });
+    // The real Measurement ID is injected at runtime from config.js
+    // This placeholder ensures the gtag function exists immediately
+    gtag('config', 'G-XXXXXXXXXX', { send_page_view: true });
   </script>
 
   <!-- Favicon (inline SVG data URI) -->
@@ -287,14 +264,11 @@
     #address-input:focus { border-color: var(--clr-primary-light) !important; outline: none; }
   </style>
 
-  <!-- Credentials (gitignored) must load before the config module -->
-  <script src="config.js"></script>
-
-  <!-- App Scripts (load order: credentials → config → api → auth → storage → ui → app) -->
+  <!-- App Scripts (load order: config → api → auth → storage → ui → app) -->
   <script src="src/config.js"></script>
   <script src="src/api.js"></script>
-  <script src="src/auth.js"></script>
-  <script src="src/storage.js"></script>
+  <script src="src/auth.js" defer></script>
+  <script src="src/storage.js" defer></script>
   <script src="src/ui.js"></script>
   <script src="src/app.js"></script>
 </body>

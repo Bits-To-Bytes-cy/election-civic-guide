@@ -2,13 +2,12 @@
  * @fileoverview Civic Flow — Secure Configuration Module
  *
  * Centralises all application configuration and API key management.
- * Supports 7 Google Services: Civic Info, Maps JS, Gemini AI,
- * Google Identity (Auth), Firebase Firestore (Storage), GA4 (Analytics),
- * and Google Calendar.
+ * Supports 6 Google Services: Civic Info, Maps JS, Gemini AI,
+ * Google Identity (Auth), Firebase Firestore (Storage), and GA4 (Analytics).
  *
- * SECURITY: No API key is ever hardcoded in this file. Keys are resolved
- * from window.__CIVIC_CONFIG__ (loaded from config.js, which is .gitignored)
- * or from the in-browser UI input fields at runtime.
+ * SECURITY: No API key is ever hardcoded. Keys are resolved from:
+ *   1. Runtime UI input fields (browser-only, never persisted)
+ *   2. window.__CIVIC_CONFIG__ (loaded from config.js, which is .gitignored)
  *
  * @module config
  */
@@ -92,15 +91,15 @@
   }
 
   /**
-   * Resolves the Firebase configuration object for Firestore & Analytics.
-   * @returns {Object} Firebase config { apiKey, authDomain, projectId, ... }
+   * Resolves the Firebase configuration object for Firestore.
+   * @returns {Object} Firebase config
    */
   function getFirebaseConfig() {
     const cfg = window.__CIVIC_CONFIG__;
     if (cfg && cfg.firebaseConfig && cfg.firebaseConfig.projectId && !cfg.firebaseConfig.projectId.includes('YOUR_')) {
       return cfg.firebaseConfig;
     }
-    throw new Error('Firebase config is not configured. See config.js.template.');
+    throw new Error('Firebase config is not configured.');
   }
 
   /**
@@ -110,8 +109,6 @@
   function getGaTrackingId() {
     const cfg = window.__CIVIC_CONFIG__;
     if (cfg && cfg.gaTrackingId && !cfg.gaTrackingId.includes('XXXX')) return cfg.gaTrackingId;
-    // Fallback: check firebaseConfig.measurementId
-    if (cfg && cfg.firebaseConfig && cfg.firebaseConfig.measurementId) return cfg.firebaseConfig.measurementId;
     return null;
   }
 
